@@ -1,13 +1,16 @@
-// Package nbtee provides an io.WriteCloser that writes everything to
-// a set of other Writers ("sinks").  Unlike io.MultiWriter, an
-// nbtee.Writer does not wait for all sinks to accept each write.
-// Instead, it copies writes into an internal buffer, and feeds the
-// data to all sinks asynchronously.
+// Package nbtee ("non-blocking tee") provides an io.WriteCloser that
+// writes everything to a set of other io.Writers ("sinks").
+//
+// Unlike an io.MultiWriter, an nbtee.Writer does not wait for all
+// sinks to accept each write.  Instead, it copies writes into an
+// internal buffer, and feeds the data to all sinks asynchronously.
 //
 // A sink that processes Write() calls too slowly misses some writes.
 //
 // If a sink's Write() method returns an error, it gets closed (if it
-// implements io.Closer), and gets no more writes.
+// implements io.Closer), and does not receive any more writes.
+//
+// Sinks can be added and removed while the nbtee.Writer is in use.
 //
 // The maximum memory used by a Writer is BufsPerSink * number of
 // clients * size of []byte slice sent to Write().
