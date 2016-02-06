@@ -102,4 +102,5 @@ func (s *sink) drain() {
 		}
 	}
 	close(s.done)
+	close(s.flushers)
 }

@@ -55,6 +55,9 @@ func NewWriter(bufsPerSink int) *Writer {
 // Add a writer. The given writer will get a copy of everything
 // written to w. If writer returns an error on any write, it will be
 // closed (if it implements io.Closer), and then removed.
+//
+// If the given writer has already been added (and not removed), Add
+// does nothing.
 func (w *Writer) Add(writer io.Writer) {
 	if w.cmd == nil {
 		w.cmd = make(chan interface{})
@@ -141,7 +144,15 @@ func (w *Writer) run() {
 	for cmd := range w.cmd {
 		switch cmd := cmd.(type) {
 		case cmdAdd:
-			sinks[cmd.Writer] = cmd
+			if _, ok := sinks[cmd.Writer]; ok {
+				// We already have a sink writing to
+				// this Writer. Terminate its
+				// goroutine by closing its channel,
+				// then forget it.
+				close(cmd.c)
+			} else {
+				sinks[cmd.Writer] = cmd
+			}
 		case cmdRemove:
 			if s, ok := sinks[cmd.Writer]; ok {
 				close(s.c)
