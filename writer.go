@@ -47,9 +47,21 @@ type cmdFlush chan struct{}
 
 var ErrNotFound = errors.New("writer was never added, or was already removed")
 
-// NewWriter returns a new Writer with the given BufsPerSink.
+// NewWriter returns a new Writer with the given BufsPerSink. The
+// returned Writer will not be ready to use until Start() is called.
 func NewWriter(bufsPerSink int) *Writer {
 	return &Writer{BufsPerSink: bufsPerSink}
+}
+
+// Start must be called before Add or Write, and must not be called
+// twice. Start returns w, so you can say
+//
+//   w := NewWriter(8).Start()
+func (w *Writer) Start() *Writer {
+	w.cmd = make(chan interface{})
+	w.done = make(chan struct{})
+	go w.run()
+	return w
 }
 
 // Add a writer. The given writer will get a copy of everything
@@ -59,11 +71,6 @@ func NewWriter(bufsPerSink int) *Writer {
 // If the given writer has already been added (and not removed), Add
 // does nothing.
 func (w *Writer) Add(writer io.Writer) {
-	if w.cmd == nil {
-		w.cmd = make(chan interface{})
-		w.done = make(chan struct{})
-		go w.run()
-	}
 	s := &sink{
 		Writer:   writer,
 		c:        make(chan []byte, w.BufsPerSink),

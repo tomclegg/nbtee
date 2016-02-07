@@ -15,12 +15,14 @@ var _ = check.Suite(&Suite{})
 
 func (s *Suite) TestCloseUnused(c *check.C) {
 	w := NewWriter(4)
+	w.Start()
 	c.Check(w.Close(), check.IsNil)
 }
 
 func (s *Suite) TestAddRemove(c *check.C) {
 	b := &bytes.Buffer{}
 	w := NewWriter(4)
+	w.Start()
 	w.Add(b)
 	w.Write([]byte{1,2,3})
 	w.Flush()
@@ -37,6 +39,7 @@ func (s *Suite) TestAddRemove(c *check.C) {
 func (s *Suite) TestRemoveAndClose(c *check.C) {
 	b := &bytes.Buffer{}
 	w := NewWriter(4)
+	w.Start()
 	w.Add(b)
 	w.Write([]byte{1,2,3})
 	w.RemoveAndClose(b)
@@ -48,6 +51,7 @@ func (s *Suite) TestRemoveAndClose(c *check.C) {
 func (s *Suite) Test1Kx1K(c *check.C) {
 	n := 1000
 	w := NewWriter(n)
+	w.Start()
 	bufs := make([]bytes.Buffer, n)
 	for i, _ := range bufs {
 		w.Add(&bufs[i])
@@ -65,6 +69,7 @@ func (s *Suite) TestSmallBufLen(c *check.C) {
 	for bufLen := range []int{0, 1, 2, 3} {
 		n := 1000
 		w := NewWriter(bufLen)
+		w.Start()
 		bufs := make([]bytes.Buffer, n)
 		for i, _ := range bufs {
 			w.Add(&bufs[i])
@@ -83,6 +88,7 @@ func (s *Suite) TestSmallBufLen(c *check.C) {
 func (s *Suite) TestSameWriterAddedTwice(c *check.C) {
 	b := &bytes.Buffer{}
 	w := NewWriter(4)
+	w.Start()
 	w.Add(b)
 	w.Add(b)
 	w.Write([]byte{1,2,3})
@@ -110,7 +116,7 @@ func (s *Suite) TestNoCloseIfNotCloser(c *check.C) {
 }
 
 func ExampleWriter_Remove() {
-	w := NewWriter(5)
+	w := NewWriter(5).Start()
 	b := &bytes.Buffer{}
 	w.Add(b)
 	closer, err := w.Remove(b)
@@ -125,7 +131,7 @@ func ExampleWriter_Remove() {
 }
 
 func ExampleWriter_RemoveAndClose() {
-	w := NewWriter(5)
+	w := NewWriter(5).Start()
 	b := &bytes.Buffer{}
 	w.Add(b)
 	err := w.RemoveAndClose(b)
