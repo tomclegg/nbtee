@@ -53,7 +53,7 @@ func (s *Suite) Test1Kx1K(c *check.C) {
 	w := NewWriter(n)
 	w.Start()
 	bufs := make([]bytes.Buffer, n)
-	for i, _ := range bufs {
+	for i := range bufs {
 		w.Add(&bufs[i])
 		w.Write([]byte{1})
 	}
@@ -71,7 +71,7 @@ func (s *Suite) TestSmallBufLen(c *check.C) {
 		w := NewWriter(bufLen)
 		w.Start()
 		bufs := make([]bytes.Buffer, n)
-		for i, _ := range bufs {
+		for i := range bufs {
 			w.Add(&bufs[i])
 			w.Write([]byte{1})
 		}
