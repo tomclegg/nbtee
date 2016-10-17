@@ -32,9 +32,9 @@ type Writer struct {
 	// capacity-1 subsequent writes will be skipped by that sink
 	// until its buffer drains to 0.
 	BufsPerSink int
-	err    error
-	cmd    chan interface{}
-	done   chan struct{}
+	err         error
+	cmd         chan interface{}
+	done        chan struct{}
 }
 
 type cmdAdd *sink
